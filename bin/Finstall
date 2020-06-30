@@ -128,6 +128,7 @@ get_ferpaths_dir() {
                 return 0
             fi
         fi
+
     done
 #   should not get here - return error
     return 1
@@ -380,27 +381,34 @@ echo " "
 until [ 0 = 1 ]; do
     echo " "
     echo " Enter your choice:"
-    echo " (1) Install executables, (2) Customize ferret_paths files, (3,q,x) Exit"
-    read -p " (1, 2, 3, q, x) --> " choice
+    echo " (2) Customize ferret_paths files, (3,q,x) Exit"
+    read -p " (2, 3, q, x) --> " choice
     case "$choice" in
-        1)
-            echo " "
-            echo " Install executables..."
-            if get_fer_dir && get_ferexec_dir; then
-                if ! install_execs; then
-                    echo " "
-                    echo " There is a problem manipulating files in "
-                    echo " "$fer_dir" "
-                    echo " Check your privileges to change files in that directory "
-                    echo " and try again. "
-                fi
-            fi
-            ;;
         2)
             echo " "
             echo " Customize ferret_paths files..."
             if get_fer_dir && get_fer_dsets && get_ferpaths_dir && get_ferpaths_link; then
                 create_ferret_paths
+
+                echo " "
+                echo " "
+                echo " ---------------------- "
+                echo " "
+                echo " Optional test of installation:"
+                echo " "
+                echo "After you exit this Finstall script,"
+                echo " "
+                echo "1- Source the ferret_paths shell script just created "
+                echo "2- Start Ferret with"
+                echo " "
+		echo "> ferret -gif"
+                echo " "
+                echo "   at the yes? prompt enter   GO install_test.jnl"
+                echo "The script output names an image file it has generated"
+                echo " "
+                echo " ---------------------- "
+                echo " "
+
             else
                 echo " "
                 echo " ferret_paths files NOT created "
