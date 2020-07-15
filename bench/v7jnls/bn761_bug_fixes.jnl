@@ -1,0 +1,5 @@
+! bn761_bug_fixes.jnl
+! test various fixes that went into version 7.61
+! 7/20 *acm*
+
+GO bn_reset

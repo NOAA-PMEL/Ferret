@@ -1339,6 +1339,14 @@ GO bn_mode_dsg
 GO bn_reset bn_string_type
 GO bn_string_type
 
+! *********** v7.61 Additions ***********
+
+GO bn_reset bn761_bug_fixes
+GO bn761_bug_fixes
+
+GO bn_reset bn_dsg_naming
+GO bn_dsg_naming
+
 ! *********** PyFerret-specific scripts ***********
 
 IF ($program_name"0|PyFerret>1|*>0") THEN
