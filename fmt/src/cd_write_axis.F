@@ -139,7 +139,9 @@
 * v751 *acm*  6/19 Allow for longer strings as attribute values
 * V751 *acm*  8/19 Issue 1947: If axis attr doesn't match grid direction, don't write it.
 * V751 *acm* 11/19 *acm* new qualifier SAVE/NOCOORDS
-
+* V7.61 *acm* 7/20 See issue 334. If the test in cd_get_1_axis has decided the axis is
+*                  irregular, write attrib as point_spacing="uneven"
+*
 * argument definitions:
 *     dset    - dset (if netcdf file, for getting name and attribute 
 *               info from linked-list structure  
@@ -582,6 +584,7 @@
      .           'POINT_SPACING', 13) ) THEN
                got_spacing = .TRUE.
 	       IF (true_month) buff = 'uneven' 
+	       IF (.NOT. line_regular(iaxis))  buff = 'uneven' 
             ELSE
                IF (attype .EQ. NF_CHAR .AND. attoutflag .EQ. 1) THEN
 		  IF (MATCH_NAME (attname,  5, 'UNITS', 5) ) THEN
@@ -589,6 +592,11 @@
                      status = STR_DNCASE(buff, buff2)
 
 		  ENDIF
+		   
+		  IF (MATCH_NAME (attname,
+     .                 TM_LENSTR1(attname), 'POINT_SPACING', 13)  .AND. 
+     .               .NOT.line_regular(iaxis))  buff = 'uneven' 
+ 
                   llen = TM_LENSTR1(buff)
                   CALL CD_WRITE_ATTRIB (cdfid, name(:nlen), attname,
      .                               buff(:llen), .FALSE., status )

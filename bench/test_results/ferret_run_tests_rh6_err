@@ -3664,12 +3664,10 @@ ooooooooooooooooooooooooooooooooooooooooooo
  PERMANENT data cleared from memory
  TEMPORARY data cleared from memory
 ooooooooooooooooooooooooooooooooooooooooooo
-           *** NOTE: Axis "X1_20" is irregular. Ignoring erroneous point_spacing=even attribute.
  LISTing to file aa.nc
  PERMANENT data cleared from memory
  TEMPORARY data cleared from memory
 ooooooooooooooooooooooooooooooooooooooooooo
-           *** NOTE: Axis "X1_20" is irregular. Ignoring erroneous point_spacing=even attribute.
  LISTing to file aa.nc
  PERMANENT data cleared from memory
  TEMPORARY data cleared from memory
@@ -6325,6 +6323,7 @@ ooooooooooooooooooooooooooooooooooooooooooo
  TEMPORARY data cleared from memory
 ooooooooooooooooooooooooooooooooooooooooooo
            *** NOTE: Axis "XAXIS" is irregular. Ignoring erroneous point_spacing=even attribute.
+ LISTing to file a.nc
  PERMANENT data cleared from memory
  TEMPORARY data cleared from memory
 ooooooooooooooooooooooooooooooooooooooooooo
@@ -6889,6 +6888,11 @@ Executed by script: *** GO bn_mode_dsg.jnl ***
            Valid options are /OUTTYPE=DOUBLE,FLOAT,INT,SHORT,or BYTE
 LIST/FORMAT=CDF/clobber/file=a.nc/outtype='string' str_temp
 Executed by script: *** GO bn_string_type.jnl ***
+*** Running ferret script: bn761_bug_fixes.jnl
+ PERMANENT data cleared from memory
+ TEMPORARY data cleared from memory
+ooooooooooooooooooooooooooooooooooooooooooo
+*** Running ferret script: bn_dsg_naming.jnl
 *** Running ferret script: bn_gif.jnl
  **ERROR: dimensions improperly specified: specified data is not a line
            - its a 2D region: "plot/i=1:10/j=1:20/nolabel i+j"
