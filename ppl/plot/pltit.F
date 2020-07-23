@@ -108,6 +108,7 @@
 * V74  *acm* -11/18 Issue #1900 Fixes for tic marks and PLOT/OVERLAY with short-interval time
 * v744 *acm* 11/18 Issue 1786: graticule lines & axes drawn if PLOT/OVER/AXES given
 * v76  *acm*  4/20 New flag ribbon_on so that RIBBON/SET; PPL PLOT works correctly
+* v761 *acm*  7/20 Issue 1982. Save XHI, XLO, YHI, YLO Needee when doing an /OVER/AXES plot.
 
 *****************************************************
 
@@ -259,6 +260,14 @@ C	SETUP AXIS FOR ALL PLOT TYPES.
 	CALL COLOR(IPEN(0))
 
 	IF (MAKEP .EQ. 'PLOT'. AND.ribbon_on) MAKEP = 'RIBPLOT'
+
+	IF (sover) THEN
+	   xlosave = xlo
+	   xhisave = xhi
+	   ylosave = ylo
+	   yhisave = yhi
+	ENDIF
+
 	IF(.NOT.SOVER)THEN
 	    is_ribbon = MAKEP.EQ.'RIBPLOT'
 	    CALL SETAX(X,NXS,XF,YF,XL,YL,XH,YH,NMX,NMY,XTI,XTL,is_ribbon)
@@ -539,6 +548,13 @@ c	    CALL PLOTPOL(X,NXS,XF,YF)
 * post-interrupt re-entry				! 1/89 - *sh*
 	
 * Draw the plot axes 
+
+	IF (sover) THEN
+	   xlo = xlosave
+	   xhi = xhisave
+	   ylo = ylosave
+	   yhi = yhisave
+	ENDIF
 
 	did_draw = draw
 	IF (.NOT.SOVER .OR. axes_on_overlay) THEN
