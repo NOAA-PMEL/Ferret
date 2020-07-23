@@ -108,7 +108,7 @@
 * V74  *acm* -11/18 Issue #1900 Fixes for tic marks and PLOT/OVERLAY with short-interval time
 * v744 *acm* 11/18 Issue 1786: graticule lines & axes drawn if PLOT/OVER/AXES given
 * v76  *acm*  4/20 New flag ribbon_on so that RIBBON/SET; PPL PLOT works correctly
-* v761 *acm*  7/20 Issue 1982. Save XHI, XLO, YHI, YLO Needee when doing an /OVER/AXES plot.
+* v761 *acm*  7/20 Issue 1982. Save XHI, XLO, YHI, YLO Needed for axes on an /OVER/AXES plot.
 
 *****************************************************
 
