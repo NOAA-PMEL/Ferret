@@ -66,6 +66,8 @@
 * V740: 3/18 *acm* Introduce parameter abstractax_len for abstract axis length 99999999
 * V741 *acm* 5/18 Promoting global attributes to a variable in ensembles, new cat_agg_gpromote
 * V7.44 11/18 *acm* Issue 1905: add int64 as a data type 
+* V761 *acm* 7/20 Issue 1981:in ISUBSCR_CX distinguish rounding for single 
+*                 point vs range of points
 
 * this should always match maxdsets in TMAP_FORMAT:
 	INTEGER		max_gfdl_dsets
@@ -275,6 +277,7 @@
 * (in FUNCTION ISUBSCRIPT to resolve ambiguities when coord is on box boundary)
 	INTEGER		round_up,
      .			round_dn,
+     .			round_sngl,
      .			round_never
 	PARAMETER     ( round_up    = 1,
      .			round_dn    = 2,

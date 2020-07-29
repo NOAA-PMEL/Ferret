@@ -1,0 +1,23 @@
+! err76_modulo_range.jnl
+! issue 1981: the range of data returned when 
+! modulo-ing on longitude axis
+! 7/29/2020  ACM
+
+def ax/edge/x=0:360:1.25/unit=degrees_east/modulo xax
+let vx = x[gx=xax]
+let v1 = 1+0*x[gx=xax]
+save/clobber/file=a.nc vx, v1
+cancel variable vx
+use a
+
+list/x=356:360 vx
+
+! Previously this loaded an extra point at i=1
+list/x=-4:0 vx
+
+! This should still return the point at i=1 
+list/x=0 vx
+
+! Here is the example reported in issue 1981.  The two results should match.
+list/nohead v1[x=300:360@sum], v1[x=-60:0@sum]
+

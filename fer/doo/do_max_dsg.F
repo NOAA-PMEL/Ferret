@@ -48,6 +48,7 @@
 * V720 *sh* 5/17 - adapted to DSG analysis from DO_MAX_SUB
 * V74+ 7/18 *acm* check for dsg_row_size_var(dset) before using it
 * V76   1/20 *acm* Orientation of Point-type data set to e_dim
+* V761  7/20 *acm* Do not initialize res().  It is already initialized.
 
         IMPLICIT NONE
         include 'tmap_dims.parm'
@@ -148,7 +149,6 @@
 * compress along the instance (feature) axis resulting in just a single value
 	   ok = 0   ! number of valid component values found
 
-	   res(1) = 0.
 	   DO ifeature = 1, nfeatures 
 
 * ... have the user's WW constraints removed this feature?

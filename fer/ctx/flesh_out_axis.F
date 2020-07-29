@@ -93,6 +93,8 @@
 * V741  *acm* 7/18 Issue 1868, do not wipe out the trans setting in the case of a constant
 * V74+ *acm*10/10 Partial fix to working with E contexts in dsg datasets.
 * V744 *acm* 11/18 Issue 965, change behavior when axis is given with strides in the region
+* V761 *acm* 7/20 Issue 1981:in ISUBSCR_CX distinguish rounding for single 
+*                 point vs range of points
 
         IMPLICIT NONE
 	include 'tmap_dims.parm'
@@ -120,7 +122,7 @@
      .		TM_DSG_NFEATURES,
      .		ss, lo_ss, hi_ss, axis, grid, cat, var, ispread,
      .		orientation, obs_dimlen, obs_line, dsgness, taxis,
-     .		xlate_grid, dset, e_line, nfeatures, i
+     .		xlate_grid, dset, e_line, nfeatures, i, ss2
 	INTEGER TM_GET_CALENDAR_ID, cal_id
 	REAL*8	TM_WORLD, SECS_TO_TSTEP, ww_nrst, ww_given, min_ww, max_ww
 	CHARACTER	VAR_CODE*128, string*128
@@ -425,9 +427,8 @@
 * world coordinate is a single point
 	   IF ( point ) THEN
 	      ww_given = cx_lo_ww(idim,cx)
-	      ss = ISUBSCR_CX(ww_given,grid,idim,cx,round_dn)
+	      ss = ISUBSCR_CX(ww_given,grid,idim,cx,round_sngl)
 	      ww_nrst = TM_WORLD( ss, grid, idim, box_middle )
-	      CALL GRID_SUBSCRIPT_EXTREMES( lo_ss, hi_ss, grid, idim )
 ! ???	      CALL VAR_SS_LIMS( idim, cx, lo_ss, hi_ss )
 * ... need to interpolate ? 
 * Note: changed to TM_FPEQ(SNGL(xxx),...) 1/94  - testing indicates that
