@@ -159,6 +159,7 @@
 * If the dataset is a DSG dataset, note the FeatureType
         its_dsg = .FALSE.
 	DO ivar = 1, maxvars
+            IF ( ds_var_setnum(ivar) .NE. dset ) CYCLE
 	   igrid = ds_grid_number(ivar)
 	   IF (igrid .EQ. int4_init) CYCLE
 	   IF (TM_ITSA_DSG_RAGGED(igrid)) THEN
@@ -174,11 +175,8 @@
 	   tlen = TM_LENSTR1( risc_buff ) + 1
 	   risc_buff = risc_buff(:tlen)//  CD_DSG_FEATURENAME(dsg_orient)
 
-	   IF (dsg_orient.LT.pfeatureType_Trajectory .OR. 
-     .         dsg_orient.GT.pfeatureType_Point) risc_buff = ''
-
 	   tlen = TM_LENSTR1( risc_buff )
-	   IF (tlen .GT. 0)  CALL SPLIT_LIST(pttmode_explct, lun, risc_buff, 0) 
+	   IF (tlen .GT. 1)  CALL SPLIT_LIST(pttmode_explct, lun, risc_buff, 0) 
 	   
 * Is a feature mask set on this dataset?
 	   IF (dsg_msk_lm(dset) .NE. int4_init .AND. dsg_msk_lm(dset).NE.unspecified_int4) THEN 
@@ -190,7 +188,7 @@
 	      tlen = TM_LENSTR1( risc_buff ) 
 	      IF (dlen .EQ. 0) tlen = tlen - 1
 
-	      IF (tlen .GT. 0)  CALL SPLIT_LIST(pttmode_explct, lun, risc_buff(:tlen), 0) 
+	      IF (tlen .GT. 1)  CALL SPLIT_LIST(pttmode_explct, lun, risc_buff(:tlen), 0) 
 	   ENDIF ! feature-mask
 
 	ENDIF
@@ -317,7 +315,12 @@
            IF (.NOT.is_undetermined) THEN
 	      
 	      grid_dsg = TM_ITSA_DSG_RAGGED(igrid)
-	      IF (grid_dsg) dsg_orient = dsg_orientation(dset)
+	      IF (grid_dsg) THEN
+	         dsg_orient = dsg_orientation(dset)
+		 IF (dsg_orient.EQ.pfeatureType_TrajectoryProfile .OR.
+     .		     dsg_orient.EQ.pfeatureType_TimeseriesProfile)
+     .		   dsg_orient = z_dim
+	      ENDIF
 
               DO 100 i = 1, listdims
                  WRITE( rbuff(i+listdims),'(I8)' ) ds_grid_start(i,ivar)

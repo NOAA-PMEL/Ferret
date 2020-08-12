@@ -279,7 +279,7 @@
      .			indep_is_log, dep_is_log, use_nice,
      .                  this_no_range(max_line_on_plot), set_axis,
      .                  timeax_both, do_units, doing_ribbon_color,
-     .                  x_is_time, y_is_time, its_traj, its_dsg, 
+     .                  x_is_time, y_is_time, its_traj, its_dsg, its_cmpnd,
      .                  expand_dsg_ok, color_dsg_id, user_hlim
 	CHARACTER*2040	FULL_VAR_TITLE, KEY_STRING, plot_title
 	CHARACTER	INTERNAL_WHOI_DATE*14, VAR_UNITS*64,
@@ -382,8 +382,9 @@
 	    grid = cx_grid(is_cx(nmv))
 	    dset = TM_DSG_DSET_FROM_GRID( grid )
 	    nfeatures = TM_DSG_NFEATURES( grid )	    
-	    its_dsg = .TRUE.
-	    CALL TM_DSG_FACTS( grid, orientation, obsdimlen, fline, its_dsg )
+
+* The dataset may be DSG but the varable not.
+	    CALL TM_DSG_FACTS( grid, orientation, obsdimlen, fline, its_dsg, its_cmpnd )
 	    IF (its_dsg) THEN
 
 	       its_traj = dsg_feature_type(dset).EQ.pfeatureType_Trajectory .OR.  

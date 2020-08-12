@@ -1,5 +1,4 @@
-	SUBROUTINE TM_DSG_FACTS( grid, orientation, obsdimlen, 
-     .			feature_line, is_dsg, is_cmpnd )
+	INTEGER FUNCTION DSG_WHATS_IT ( grid )
 
 *
 *
@@ -36,71 +35,64 @@
 *  CONNECTION WITH THE ACCESS, USE OR PERFORMANCE OF THIS SOFTWARE. 
 *
 *
-* return the feature orientation and netCDF dim length of the observations
-* in a DSF file
-* THIS ROUTINE SHOULD ONLY BE CALLED FOR GRIDS KNOWN TO BE DSG 
+* determine the DSG-ness of this grid.  It may be a
+*    - non-DSG
+*    - DSG instance variable
+*    - DSG contiguous ragged array
+*    - timeseries- or trajectory- variable in a timseriesProfile or trajectoryProfile set
 
 * V720 *sh* 4/17
-* V74+ *acm* 9/18 Allow an abstract axis (e.g. merging grids)
-* V761 *acm* 7/20 Return a flag for a compound type, timeseriesProfile or
-*                 trajectoryProfile.
 
-      include 'netcdf.inc'
-      include 'tmap_errors.parm'
       include 'tmap_dims.parm'
       include 'implicit.parm'
-#include "gt_lib.parm"
+      include 'ferret.parm'
       include 'xtm_grid.cmn_text'
       include 'xdset_info.cmn_text'
       include 'xfr_grid.cmn'
 
 * argument declarations
-	LOGICAL is_dsg, is_cmpnd
-	INTEGER grid, orientation, obsdimlen, feature_line
+	INTEGER grid
 
 * internal variable declarations
-	INTEGER e_line, dset, mabstract, status
+	INTEGER line, dset, orient
 
-* the E axis points to the DSG orientation. 
-* Or is this even a dsg grid? The dataset may be dsg, but what if we're just 
-* defining some other variable, maybe defining a mask.
-
-	e_line = grid_line(e_dim,grid)
-	mabstract = grid_line( x_dim, mgrid_abstract )
-
-	IF (e_line.EQ.mpsnorm .OR. e_line.EQ.mabstract) THEN
-	   is_dsg = .FALSE.
-	   GOTO 9999
+* the test of DSG-ness is line_dsg_dset points to dset on the E axis
+	line = grid_line(e_dim,grid)
+	IF (line .EQ. mnormal) THEN
+	   line = grid_line(f_dim,grid)
+	   IF (line .EQ. mnormal) THEN
+	      DSG_WHATS_IT = pdsg_not_dsg
+	   ELSE
+	      DSG_WHATS_IT = pdsg_f2var
+	      RETURN
+	   ENDIF
+	ENDIF
+	dset = line_dsg_dset(line)
+	IF (dset .EQ. pline_not_dsg) THEN
+	   DSG_WHATS_IT = pdsg_not_dsg
+	   RETURN
 	ENDIF
 
-	dset = line_dsg_dset(e_line)
-	
-* this only happens if the programmer made an error
-	IF (dset .EQ. pline_not_dsg) STOP 'TM_DSG_FACTS'
+* we are looking at a DSG grid
+* the test for contiguous ragged is the existence of a feature axis
+* with line_dsg_dset == the dset
+* For user-variables that use some grid-changing functions, the
+* result is defined as having abstract axes (e.g. STRINDEX(expocode, "PAN")
+* has an abstract axis in axes other than the E axis that it gets from expocode.
 
-	orientation = dsg_orientation(dset)
+	orient = dsg_orientation(dset)
+	IF (orient.EQ.y_dim .OR. orient.EQ.f_dim) orient = z_dim ! compound feature type
+	line = grid_line(orient,grid)
+	IF (grid_line(orient,grid) .EQ. mnormal  .OR. 
+     .      grid_line(orient,grid) .EQ. grid_line(1,mgrid_xabstract)) THEN
+	   DSG_WHATS_IT = pdsg_instance
+	ELSEIF (line_dsg_dset(line) .EQ. pline_not_dsg) THEN
+	   DSG_WHATS_IT = pdsg_not_dsg
+	ELSE
+	   DSG_WHATS_IT = pdsg_observation
+	ENDIF
 
-	feature_line = grid_line(orientation,grid)
+	IF (orient .EQ. e_dim) DSG_WHATS_IT = pdsg_instance
 
-	obsdimlen = dsg_obs_dimlen(dset)
-
-	is_cmpnd = orientation.EQ.y_dim .OR. orientation.EQ.f_dim
-
-* success
         RETURN
-
-* unreported error -- just a message
- 9999	RETURN
- 5100	CALL TM_ERRMSG (merr_undefline, status, 'TM_DSG_FACTS',
-     .                       no_descfile, no_stepfile,
-     .                       no_errstring, no_errstring, *9999)
-
         END
-
-
-
-
-
-
-
-

@@ -117,12 +117,13 @@
 * internal variable declarations:
 	LOGICAL TM_DATE_OK, TM_FPEQ, INHERITED_LIMITS, TM_ITSA_DSG_RAGGED,
      .		ITSA_REGRID_FROM_DSG, 
-     .		point, lim_redundant, is_time, fromdsg, abst_nolim, its_dsg
+     .		point, lim_redundant, is_time, fromdsg, abst_nolim, 
+     .		its_dsg, its_cmpnd
 	INTEGER	TM_LENSTR1, ISUBSCR_CX, DSG_WHATS_IT, TM_DSG_DSET_FROM_GRID,
      .		TM_DSG_NFEATURES,
      .		ss, lo_ss, hi_ss, axis, grid, cat, var, ispread,
      .		orientation, obs_dimlen, obs_line, dsgness, taxis,
-     .		xlate_grid, dset, e_line, nfeatures, i, ss2
+     .		xlate_grid, dset, e_line, nfeatures, i
 	INTEGER TM_GET_CALENDAR_ID, cal_id
 	REAL*8	TM_WORLD, SECS_TO_TSTEP, ww_nrst, ww_given, min_ww, max_ww
 	CHARACTER	VAR_CODE*128, string*128
@@ -150,7 +151,8 @@
 	   IF (idim .EQ. f_dim) GOTO 1000  ! treat like a gridded axis
 * ... initialize DSG info
 	   its_dsg = .TRUE.
-	   CALL TM_DSG_FACTS(grid, orientation, obs_dimlen, obs_line, its_dsg)
+	   CALL TM_DSG_FACTS(grid, orientation, obs_dimlen, obs_line,
+     .                       its_dsg, its_cmpnd)
 	   dset = TM_DSG_DSET_FROM_GRID(grid)
 	   IF (.NOT. its_dsg) dsgness = pdsg_not_dsg
 	ENDIF
@@ -211,6 +213,7 @@
 	         cx_hi_ss(cx,idim) = line_dim(axis) ! E axis length
 	      ENDIF
 	   ELSEIF (dsgness .EQ. pdsg_observation) THEN
+	      IF (its_cmpnd) orientation = z_dim
 	      IF (idim .EQ. orientation) THEN
 	         cx_lo_ss(cx,idim) = 1
 	         cx_hi_ss(cx,idim) = obs_dimlen   ! DSG observation dim length
@@ -429,17 +432,9 @@
 	      ww_given = cx_lo_ww(idim,cx)
 	      ss = ISUBSCR_CX(ww_given,grid,idim,cx,round_sngl)
 	      ww_nrst = TM_WORLD( ss, grid, idim, box_middle )
-! ???	      CALL VAR_SS_LIMS( idim, cx, lo_ss, hi_ss )
 * ... need to interpolate ? 
-* Note: changed to TM_FPEQ(SNGL(xxx),...) 1/94  - testing indicates that
-*		double precision time ranges are nexer used at this point
-#ifdef double_p
 	      IF (  mode_interpolate
      .	     .AND. .NOT.TM_FPEQ((ww_given),(ww_nrst)) ) THEN
-#else
-	      IF (  mode_interpolate
-     .	     .AND. .NOT.TM_FPEQ(SNGL(ww_given),SNGL(ww_nrst)) ) THEN
-#endif
 * ... set up context to interpolate
 	         IF ( cx_trans(idim,cx) .NE. trans_no_transform
      .		.AND. cx_trans(idim,cx) .NE. trans_interpolate ) GOTO 5200
