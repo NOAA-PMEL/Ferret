@@ -9,7 +9,7 @@ the `bench/test_results` directory.
 
 The manual testing uses a script to run all the tests in a single instance of 
 ferret. Plots are displayed as the tests are run. Expected results are given 
-by the `bench/ansley_official*` files as well as under the `metafile_masters*` 
+by the `bench/run_all_logs*` files as well as under the `metafile_masters*` 
 subdirectories.
 
 Note that these tests expect the nco utility programs `ncdump` and `ncatted` 
@@ -99,9 +99,9 @@ We may remove them by running the script `clean_ultra` (or `clean_draconian`)
 and piping the output to a new file, for the official benchmark log file and 
 the one just created:
 
-> $ clean_ultra ansley_official.x86_64-linux_log \> cleaned_ansley_official.x86_64-linux_log  
+> $ clean_ultra run_all_logs.x86_64-linux_log \> cleaned_run_all_logs.x86_64-linux_log  
 > $ clean_ultra all_01nov16at0959.x86_64-linux_log \> cleaned_all_01nov16at0959.x86_64-linux_log  
-> $ diff cleaned_ansley_official.x86_64-linux_log cleaned_all_01nov16at0959.x86_64-linux_log  
+> $ diff cleaned_run_all_logs.x86_64-linux_log cleaned_all_01nov16at0959.x86_64-linux_log  
 
 Some differences will still always exist: 
 
