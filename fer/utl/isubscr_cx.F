@@ -88,7 +88,7 @@
 
 * initialize
         isubsc = 0
-	num_mod = 0
+        num_mod = 0
 
 * Distinguish round-down when getting subscripts for a pair lo:hi
 * with round-down for a single point
