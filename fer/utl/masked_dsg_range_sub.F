@@ -24,7 +24,7 @@
      .		ivar, row_size_lm, coord_lm, count, instance_ndim
 	REAL    GET_LINE_COORD, low, hig, low360, hig360, coord, bad
 
-* features included in the current masking. If all features includedd and
+* features included in the current masking. If all features included and
 * no constraints, leave lo, hi unchanged.
 
 	CALL MAKE_DSG_FEATURE_MASK(dset, cx, process_feature, nfeatures)
