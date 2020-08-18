@@ -279,7 +279,8 @@
      .			round_never
 	PARAMETER     ( round_up    = 1,
      .			round_dn    = 2,
-     .			round_never = 3	)
+     .			round_never = 3,
+     .			round_sngl  = 0	)
 
 * codes to designate what mathematical transformations have been applied
 	INTEGER		max_plane_transform,
