@@ -154,11 +154,13 @@
 * v7.5      4/22/2019 Release
 * v7.6     11/27/2019 bump DSG version number to 7.6 to distinguish from updated pre-DSG version (7.52)
 * v7.61     7/23/2020 fixes and revisions to v7.6
-        IMPLICIT NONE
+* v7.62     8/18/2020 TrajectoryProfile and TimeseriesProfile handled, but only as if they are profile
+
+	IMPLICIT NONE
 	include	'xrevision.cmn'
 
 	DATA program_name	/ 'FERRET' /
 	DATA len_program_name	/  6       /
-	DATA revision_level	/  7.61   /
+	DATA revision_level	/  7.62   /
 
 	END
