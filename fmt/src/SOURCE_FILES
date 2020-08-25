@@ -140,7 +140,6 @@ ez_mod_vars.F\
 ez_permuted_index.F\
 ez_read.F\
 ez_update_var.F\
-free_time.F\
 get_line_coord.F\
 gt_get_time_axis.F\
 lib_free_lun.F\
