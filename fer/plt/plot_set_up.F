@@ -231,7 +231,7 @@
 *                 such as"go fland" will work. (DSG and non-DSG data.)
 * V760 *acm* 4/20 Similarly, if PLOT/VS and a depth coord var is on the vertical
 *                 axis, reverse the axis to run DEEP:SHALLOW
-
+* V762 *acm* 8/20 Add a second test for is this a trajectory ribbon plot.
 
         IMPLICIT NONE
 	include 'tmap_dims.parm'
@@ -419,6 +419,7 @@
      .              overlay, no_labels, symbol, sym_size, color, color1, 
      .              use_line, do_dash, dashstyle, nokey, its_traj, only_val, 
      .              skipsym, mv_list, cx_list, numv, indep_dat, dep_dat, status )
+		  IF (numv.EQ.3 .AND. status.NE.ferr_ok) GOTO 2000  ! not traj after all, just a ribbon plot
 		  GOTO 1000
 	       ENDIF
 
@@ -429,6 +430,8 @@
 	 ENDIF ! dsg_ragged
 
 * initialize
+
+ 2000	CONTINUE
 
 	dep_max = arbitrary_small_val8
 	dep_min = arbitrary_large_val8
