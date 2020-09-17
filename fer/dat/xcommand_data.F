@@ -825,7 +825,7 @@
 		DATA qualifiers  (nqual_at3g+0)	/ 'ALL '	/
 		DATA qualifiers  (nqual_at3g+1)	/ 'NOERROR'	/
 		DATA qualifiers  (nqual_at3g+2)	/ 'FMASK'	/
-		DATA qualifiers  (nqual_at3g+2)	/ 'SMASK'	/
+		DATA qualifiers  (nqual_at3g+3)	/ 'SMASK'	/
 * CANCEL MODE
 	   DATA subcommands      (nsub_at3 + 7)	/ 'MODE'	/
 	   DATA num_qualifs      (nsub_at3 + 7)	/ nqual3h	/
