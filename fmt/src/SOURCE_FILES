@@ -140,6 +140,7 @@ ez_mod_vars.F\
 ez_permuted_index.F\
 ez_read.F\
 ez_update_var.F\
+free_time.F\
 get_line_coord.F\
 gt_get_time_axis.F\
 lib_free_lun.F\
@@ -218,9 +219,10 @@ tm_dset_use_grids.F\
 tm_dsg_dset_from_grid.F\
 tm_dsg_e_axis.F\
 tm_dsg_facts.F\
+tm_dsg_ftrset_facts.F\
 tm_dsg_instance_grid.F\
-tm_dsg_nfeatures.F\
 tm_dsg_nf2features.F\
+tm_dsg_nfeatures.F\
 tm_dsg_obs_grid.F\
 tm_dsg_orientation.F\
 tm_errmsg.F\
