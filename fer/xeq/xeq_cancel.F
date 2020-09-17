@@ -429,10 +429,20 @@
 * deallocate line memory if a mask-by-feature variable was used.
 * 
 	      IF (qual_given(slash_can_dat_fmask) .GT. 0) THEN
-	         IF (dsg_msk_lm(iset) .NE. unspecified_int4) THEN
-	            CALL FREE_LINE_DYNMEM( dsg_msk_lm(iset) )
-	            CALL TM_DEALLO_DYN_LINE( dsg_msk_lm(iset) )
-	            dsg_msk_lm(iset) = unspecified_int4
+	         IF (dsg_msk_lm(iset) .NE. unspecified_int4 .OR. 
+     .		     dsg_ftrsetmsk_lm(iset) .NE. unspecified_int4) THEN
+
+		    IF (dsg_msk_lm(iset) .NE. unspecified_int4 ) THEN
+	               CALL FREE_LINE_DYNMEM( dsg_msk_lm(iset) )
+	               CALL TM_DEALLO_DYN_LINE( dsg_msk_lm(iset) )
+	               dsg_msk_lm(iset) = unspecified_int4
+		    ENDIF
+		    
+		    IF (dsg_ftrsetmsk_lm(iset) .NE. unspecified_int4 ) THEN
+	               CALL FREE_LINE_DYNMEM( dsg_ftrsetmsk_lm(iset) )
+	               CALL TM_DEALLO_DYN_LINE( dsg_ftrsetmsk_lm(iset) )
+	               dsg_ftrsetmsk_lm(iset) = unspecified_int4
+		    ENDIF
 
 		    varid = 0
 		    attname = '__feature_mask_'

@@ -58,6 +58,7 @@
 * V740 *acm*  2/18 Issue 966: LET/LIKE= Get attributes from another variable
 * V740 *kms*  3/18 Add space for PyFerret PLOT/HIGHLIGHT=
 * V74+ *acm*  9/18 Add aliases FMASK for SET DATA/FMASK and CLEARMASK for CANCEL DATA/FMASK
+* V74+ *acm*  9/18 Add aliases SMASK for SET DATA/SMASK
 
 * PARAMETERS are used to store numbers of subcommands and qualifiers for use
 * in BLOCK DATA XCOMMAND_DATA.  They are also used to compute pointers into
@@ -442,7 +443,7 @@
      .			total_num_commands	= 30,
      .			total_num_subcommands	= nsub_at31 - 1,
      .			total_num_qualifiers	= nqual_at31a - 1,
-     .	                num_predefined_alias    = 27,
+     .	                num_predefined_alias    = 28,
      .			max_queries		= 50 )
 
 * declarations

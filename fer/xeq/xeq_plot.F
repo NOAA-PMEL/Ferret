@@ -154,6 +154,7 @@
         include 'CONT.INC'
         include 'makedot.cmn'
 	include 'xtext_info.cmn'
+	include 'xdset_info.cmn_text'
 
 	
 * calling argument declarations:
@@ -163,19 +164,27 @@
      .			overlay, transpz, versus,
      .			no_labels, set_up, noaxes, axes, use_line,
      .			is_logh, is_logv, nokey, no_data, no_range,
-     .			do_key, spectrum, addgaps, along
+     .			do_key, spectrum, addgaps, along, its_traj, 
+     .			its_dsg, dsg_as_traj, dsg_as_time, is_cmpnd
 	INTEGER		TM_LENSTR1, TM_LENSTR, STR_UPCASE, STR_SAME,
      .                  symbol, color, color1, status,
      .			loc, limit, slen, thick, step_inc,
      .			ax1_work, ax2_work,
      .			do_dash, s1, s2, it_start(4), it_end(4),
      .			nparm, num_it, i, iax(4), i1,
-     .                  loch, locv, nvs, skipsym, dsgtype
+     .                  loch, locv, nvs, skipsym, idir, grid
 	REAL		val, sym_size, dashstyle(4), only_val
 	CHARACTER	LEFINT*4, buff*128
 	
 	CHARACTER	TM_INQ_PATH*2048, sfile*2048
 	INTEGER ncolors
+
+* initialize DSG settings
+
+	its_dsg = .FALSE.
+	is_cmpnd = .FALSE.
+	dsg_as_traj = .FALSE.
+	grid_is_dsg = .FALSE.
 
 * set up the graphics environment and get the data
 	CALL START_PPLUS
@@ -343,7 +352,8 @@ CC       => Set values here instead.
               ENDIF
            ENDIF
 
-	ENDIF
+	ENDIF ! thick
+
 * ... PLOT/LINE_STYLE=n
 	loc = qual_given( slash_plot_line )
 	IF ( loc .GT. 0  ) THEN
@@ -419,13 +429,23 @@ c	      limit = num_fancy_lines 			!was num_plain 1/94
 * If they've sent more than one variable, that's an error unless it's a non-map 
 * scatter plot; use PLOT/VS or PLOT/VS/RIBBON)
  
-	IF (grid_is_dsg) THEN
-	   IF (ITSA_DSG_TRAJ (is_cx(1)) .OR. ITSA_DSG_POINTS (is_cx(1)) ) THEN
+* Is it dsg dataset?  Is this a trajectory plot or trajectoryProfile-as-trajectory plot?
+
+
+	IF (dsg_user_direction .NE. 0) THEN
+	   grid = cx_grid(is_cx(1))
+	   CALL TM_DSG_FACTS ( grid, idir, i1, i, its_dsg, is_cmpnd )
+	ENDIF 
+	 
+	IF (its_dsg .OR. is_cmpnd) THEN
+	   CALL DSG_PLTALONG_SETUP (cx_data_set(is_cx(1)), idir, its_traj, 
+     .				dsg_as_traj, dsg_as_time, status)
+	   IF (status .NE. ferr_ok) GOTO 5000
+
+	   IF (its_traj .OR. dsg_as_traj) THEN
 	      IF (num_uvars_in_cmnd .EQ. 1) THEN  
 	         versus = .TRUE.
 	         ribbon_plot = .TRUE.
-	      ELSE
-	         IF (.NOT. versus) GOTO 5700
 	      ENDIF
 	   ENDIF
 
@@ -437,6 +457,7 @@ c	      limit = num_fancy_lines 			!was num_plain 1/94
 
 	ENDIF
 
+
 	ribbon_on = ribbon_plot  !  Flag to PPLUS in LINES.INC
 
 * A "gaps" variable specifies the end of line segments to draw.
@@ -446,8 +467,12 @@ c	      limit = num_fancy_lines 			!was num_plain 1/94
 
 	IF ( ribbon_plot  ) THEN
 	   CALL RIBBON_PLOT_SET_UP (versus, num_uvars_in_cmnd, addgaps, 
-     .			            thick, overlay, spectrum, status)
+     .	      dsg_as_traj, idir, thick, overlay, spectrum, status)
 	   color = thick
+
+	   IF (dsg_as_traj .AND. idir.EQ.x_dim .AND.
+     .	       qual_given(slash_plot_line).EQ.0 ) use_line = .TRUE.
+	   IF (dsg_as_traj .AND. idir.EQ.e_dim) use_line = .FALSE.
 	ENDIF 
 
 * ... PLOT/STEP[=CONNECTED]
@@ -686,7 +711,7 @@ c done in plot_set_up.
 * release the memory used for axis buffers
 ! PLOT/ALONG does a hack to num_uvars_in_cmnd that can lead to a problem
 ! in GET_PROT_CMND_DATA if the same argument string is re-used in the next cmnd
- 1000	IF (along) num_uvars_in_cmnd = 1
+ 1000	IF (along .AND. .NOT.grid_is_dsg) num_uvars_in_cmnd = 1
 	IF (grid_is_dsg .AND. .NOT.versus) 
      .	  CALL RESET_DSG (num_uvars_in_cmnd, is_cx)
 	CALL FREE_WS_DYNMEM( ax1_work )

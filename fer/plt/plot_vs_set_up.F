@@ -217,6 +217,7 @@
      .			dsg_as_traj, dsg_as_time, status)
 	    IF (status .NE. ferr_ok) GOTO 5000
 	    IF (dsg_as_time) plot_axis(1) = t_dim
+	    its_traj = do_traj
 
 * Is this just a regular ribon plot with 3 variables (not a lon/lat traj plot)? 
 * OR a PLOT/VS var1,var2 from a DSG dataset for var1,var2 not lon/lat?
@@ -224,9 +225,9 @@
 
 	    IF (.NOT.dsg_as_traj .AND. .NOT.dsg_as_time) 
      .		CALL CHECK_PLOT_TRAJ (versus, numv, grid, its_traj)
-	    its_traj = its_traj .OR. do_traj
 
-	    IF (its_traj .OR. do_traj) ribbon_plot = .TRUE.
+	    IF (.NOT.its_traj) native_traj = .FALSE.
+	    IF (its_traj) ribbon_plot = .TRUE.
 
 *  numv = 1 if we're doing the trajectory ribbon plot automatically with PLOT var
 *  Still allow doing it the old fashioned way numv = 2  for plot/vs lon, lat
