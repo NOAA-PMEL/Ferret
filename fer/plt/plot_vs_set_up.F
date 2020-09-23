@@ -45,7 +45,7 @@
 * This version handles all of the logic for versus plots, pulling that out of
 * plot_set_up.F
 * 9/2020 ACM
-
+* v763 *acm* 9/20 Fixing bug with PLOT/VS of single-valued data, negative longitudes.
 
         IMPLICIT NONE
 	include 'tmap_dims.parm'
@@ -256,7 +256,7 @@
 		  IF (numv.EQ.3 .AND. status.NE.ferr_ok) GOTO 2000  ! not traj after all, just a ribbon plot
 	       
 	       ELSE IF (do_traj .OR. dsg_as_traj) THEN
-		  CALL  DSG_TRAJ_ALONGXY_SETUP( 
+		  CALL  DSG_TRAJ_ALONGXY_SETUP( dset, 
      .                 overlay, no_labels, symbol, sym_size, color, 
      .                 color1, use_line, do_dash, dashstyle, nokey,
      .                 only_val, skipsym, mv_list, cx_list, 
@@ -617,7 +617,7 @@
 	         ind_min = 0.D0
 	         ind_max = 1.D0
 	      ELSE
-	         delta = 0.1* val1
+	         delta = 0.1* ABS(val1)
 	         ind_min = val1 - delta
 	         ind_max = val1 + delta
 	      ENDIF
@@ -1297,7 +1297,7 @@
 	   ELSEIF ( all_1_dep ) THEN
 	      IF (only_val .EQ. bad_val4) val1 = 0.0	! 10/99
 	      delta = 1.
-	      IF (val1 .NE. 0) delta = 0.1* val1
+	      IF (val1 .NE. 0) delta = 0.1* ABS(val1)
 	      
 	      CALL AXIS_ENDS( dep_ax, the_taxis, grid,val1-delta,val1+delta,delta,
      .                        dep_is_log, dep_axtyp, versus, status )   
