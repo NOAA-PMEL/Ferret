@@ -42,6 +42,7 @@
 * NOAA/PMEL, Seattle, WA - SDIG
 
 * V762 8/20 *ACM*
+* V762 9/20 *ACM* for both TimeseriesProfile and TrajectoryProfile data types
 
 	include 'tmap_dims.parm'
 	include 'ferret.parm'
@@ -73,7 +74,7 @@
 	CALL TM_DSG_FACTS( grid, orientation, obsdimlen, feature_line, 
      .                     its_dsg, its_cmpnd )
 
-	IF (orientation .NE. pfeatureType_TimeseriesProfile) RETURN
+	IF (.NOT. its_cmpnd) RETURN
 
 * Get the station-index and use it to pick out the station-id or trajectory-id mask
 * from the feature mask

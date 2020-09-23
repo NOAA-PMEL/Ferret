@@ -44,6 +44,7 @@
 * V74+ *acm* 9/18 Allow an abstract axis (e.g. merging grids)
 * V761 *acm* 7/20 Return a flag for a compound type, timeseriesProfile or
 *                 trajectoryProfile.
+* V763 *acm* 9/20 Return if grid not defined.
 
       include 'netcdf.inc'
       include 'tmap_errors.parm'
@@ -69,6 +70,8 @@
 	nfeatures = 0
 	nftrsets = 0
 	dset = 0
+	
+	IF (grid .LE. 0) RETURN
 
 * For the ftrset grid, station-id or trajectory-id in a timeseriesProfile
 * or trajectoryProfile dataset, it's the F direction\

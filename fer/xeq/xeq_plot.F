@@ -129,6 +129,7 @@
 * V751 8/19 *acm*  DSG-enabled Ferret: argumemnt to ITSA_DSG_TRAJ is no longer a dummy
 * V76  1/20 *acm*  working with Point-type dsg data
 * V76  4/20 *acm*  New flag ribbon_on so that RIBBON/SET; PPL PLOT works correctly
+* v763 *acm* 9/20 Plots of id-variables in trajectory-profile, timeseries-profile data
 
         IMPLICIT NONE
 	include 'tmap_dims.parm'
@@ -167,12 +168,13 @@
      .			do_key, spectrum, addgaps, along, its_traj, 
      .			its_dsg, dsg_as_traj, dsg_as_time, is_cmpnd
 	INTEGER		TM_LENSTR1, TM_LENSTR, STR_UPCASE, STR_SAME,
+     .			TM_DSG_DSET_FROM_GRID,
      .                  symbol, color, color1, status,
      .			loc, limit, slen, thick, step_inc,
      .			ax1_work, ax2_work,
      .			do_dash, s1, s2, it_start(4), it_end(4),
      .			nparm, num_it, i, iax(4), i1,
-     .                  loch, locv, nvs, skipsym, idir, grid
+     .                  loch, locv, nvs, skipsym, idir, grid, dset
 	REAL		val, sym_size, dashstyle(4), only_val
 	CHARACTER	LEFINT*4, buff*128
 	
@@ -429,12 +431,17 @@ c	      limit = num_fancy_lines 			!was num_plain 1/94
 * If they've sent more than one variable, that's an error unless it's a non-map 
 * scatter plot; use PLOT/VS or PLOT/VS/RIBBON)
  
-* Is it dsg dataset?  Is this a trajectory plot or trajectoryProfile-as-trajectory plot?
-
+* Is it a dsg dataset?  Is this a trajectory plot or trajectoryProfile-as-trajectory plot?
 
 	IF (dsg_user_direction .NE. 0) THEN
 	   grid = cx_grid(is_cx(1))
 	   CALL TM_DSG_FACTS ( grid, idir, i1, i, its_dsg, is_cmpnd )
+	   
+	   IF (TM_DSG_DSET_FROM_GRID(grid) .LT. pdset_irrelevant) THEN
+	      dset = cx_data_set(is_cx(1))
+	      IF (dset .GT.pdset_irrelevant )  grid = dsg_xlate_grid(dset)
+	      CALL TM_DSG_FACTS ( grid, idir, i1, i, its_dsg, is_cmpnd )
+	   ENDIF
 	ENDIF 
 	 
 	IF (its_dsg .OR. is_cmpnd) THEN

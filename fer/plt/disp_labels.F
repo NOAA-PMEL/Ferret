@@ -71,6 +71,7 @@
 *                 the label or the symbol labnum_datitl
 * v74+ *acm* 7/18 For plots of DSG data, write the upper-left labels as world coords
 * v751 *acm* 9/18 Updates for user-defined variables on DSG grids
+* v763 *acm* 9/20 Plots of id-variables in trajectory-profile, timeseries-profile data
 
         IMPLICIT NONE
 	include 'tmap_dims.parm'
@@ -127,6 +128,14 @@
 	dset_dsg = pdsg_not_dsg
         IF (dset_num .GT. pdset_irrelevant) THEN
 	   dset_dsg = TM_DSG_DSET_FROM_GRID( grid )
+	   
+	   IF (dset_dsg.LT.pdset_irrelevant .AND. dset_num.GT.pdset_irrelevant) THEN
+	      IF (dsg_xlate_grid(dset_num) .GT. 0) THEN
+	         dset_dsg = dset_num
+		 grid = dsg_xlate_grid(dset_num) 
+	      ENDIF
+	   ENDIF
+
            IF (dset_dsg .GT. pdset_irrelevant) THEN
 	      IF ( dsg_ragged(dset_dsg) ) grid = dsg_xlate_grid(dset_dsg) 
 	      cx_grid(joint_cx) = grid

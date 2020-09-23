@@ -1,4 +1,4 @@
-        SUBROUTINE DSG_TRAJ_ALONGXY_SETUP ( 
+        SUBROUTINE DSG_TRAJ_ALONGXY_SETUP ( dset,
      .				overlay, no_labels, symbol, sym_size, color, 
      .				color1, use_line, do_dash, dashstyle, nokey,
      .				only_val, skipsym, mv, cx, indep_dat, dep_dat, status )
@@ -45,6 +45,8 @@
 *
 * based on dsg_traj_plot_set_up, Set up to draw trajectory plots from a dsg trajectoryProfile dataset
 * V762 *acm* 9/20 
+* v763 *acm* 9/20 Plots of id-variables in trajectory-profile, timeseries-profile data
+
 
 	include 'tmap_dims.parm'
 	include 'xtm_grid.cmn_text'
@@ -75,7 +77,7 @@
 * calling argument declarations:
 	LOGICAL		overlay, no_labels, use_line,
      .			nokey
-	INTEGER		symbol, color, color1, do_dash, skipsym,
+	INTEGER		dset, symbol, color, color1, do_dash, skipsym,
      .			mv, cx, status
 	REAL		sym_size, dashstyle(*), only_val
 	REAL		indep_dat(*), dep_dat(*)     ! dynamic space allocation
@@ -88,22 +90,22 @@
      .			this_no_range(max_line_on_plot), indep_is_log, set_lev, 
      .			its_dsg, its_cmpnd, mask_applied, user_hlim, is_dsg, 
      .			is_cmpnd, dirs(4), tsprof, its_traj, dsg_as_time, 
-     .			dsg_as_traj, as_traj
+     .			dsg_as_traj, as_traj, color_by_station
      .			
 	CHARACTER	LEFINT*8, LEFT_REAL*16, FULL_VAR_TITLE*2040,
      .			indep_ax*1, dep_ax*1, tstyle*3, 
      .			buff1*40, buff2*16, t1_date*14, tref*14, fmt*4
-	INTEGER		TM_LENSTR1, CGRID_SIZE, CGRID_AXIS, 
+	INTEGER		TM_LENSTR1, CGRID_SIZE, CGRID_AXIS, DSG_WHATS_IT,
      .			TM_DSG_DSET_FROM_GRID, TM_DSG_NFEATURES, TM_DSG_OBS_GRID,
      .			slen, ito, indep_lab, dep_lab, nline_in_mem,
      .			indep_dim, npts, dep_dim, npts2, ndv, var1,
-     .			grid, grid1, ipl, ndim, dims(6),
+     .			grid, ipl, ndim, dims(6),
      .			slen2, slen3, tax, plot_mem_used, i,
      .			pxlim, pylim, phlim, pvlim, pindeplim, pdeplim,
      .			dep_axtyp, indep_axtyp, the_taxis, ribbon_var, 
      .			gap_var, iiunits, iaxis, hblk1, mvh_temp, 
      .			nkey_entries, itmp, igrd_save, cal_id_1,
-     .			icode, dset, nfeatures, obsdimlen, fline,
+     .			icode, dset_dsg, nfeatures, obsdimlen, fline,
      .			idim, coord_lm, ivar, dim(nferdims), numcx,
      .			dep_nok, indep_nok, line_symbol, nmasked, nftrsets, 
      .			row_size_lm, orientation, ifeature, imask, iftr, 
@@ -166,18 +168,16 @@
 
 * For DSG dataset get number of features and obsdimlen
 
-	grid = cx_grid(cx)
-	dset = TM_DSG_DSET_FROM_GRID( grid )
-	nfeatures = TM_DSG_NFEATURES( grid )
 	its_dsg = .TRUE.    
+	grid = cx_grid(cx)
+	color_by_station = DSG_WHATS_IT(grid) .EQ. pdsg_fs_dim
+
+	grid = dsg_xlate_grid(dset)
 
 	CALL TM_DSG_FACTS( grid, idim, obsdimlen, fline, its_dsg, its_cmpnd )
 
-	IF (its_cmpnd) THEN
-	   grid = dsg_xlate_grid(dset)
-	   CALL TM_DSG_FTRSET_FACTS( grid, dset, orientation, 
+	CALL TM_DSG_FTRSET_FACTS( grid, dset, orientation, 
      .                  nfeatures, nftrsets, is_dsg, is_cmpnd, status )
-	ENDIF
 
 	tsprof = (orientation .EQ. pfeatureType_TimeseriesProfile)
      
@@ -185,22 +185,13 @@
      .              dsg_as_time, status)
 	as_traj = orientation.EQ.pfeatureType_TrajectoryProfile .AND. idim.EQ.x_dim
 
+
 	ul_dolab(z_dim) = .TRUE.
 
 	ALLOCATE (process_obs(obsdimlen )) 
 	ALLOCATE (process_feature(nfeatures )) 
         ALLOCATE (cmpnd_index(nfeatures))
         ALLOCATE (coord(nfeatures))
-
-	IF (.NOT. its_dsg) GOTO 5200
-
-* The variable may be on the feature-axis or the ftrset-axis. We will deal 
-* with that later 
-
-         IF ( .NOT. TM_ITSA_DSG_RAGGED( grid ) ) THEN
-	    indep_dim = x_dim
-	    grid1 =  dsg_xlate_grid(dset)
-	 ENDIF
 
 * check for improper data supplied
 	IF ( overlay ) THEN
@@ -387,9 +378,8 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 	      ind_max = ind_max + pad
 	   ENDIF
 
-	   CALL AXIS_ENDS(indep_ax,indep_dim,grid1,ind_min,ind_max,
+           CALL AXIS_ENDS(indep_ax,indep_dim,grid,ind_min,ind_max,
      .                     delta, indep_is_log, indep_axtyp, versus, status)
-
 * This routine checks the units and the setting for formatted lon/lat axes
 * If the formatting has been turned off, resets iunits and flag mod_vs_x.
 
@@ -488,7 +478,7 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 	IF (.NOT.overlay) THEN
 
 	   delta = unspecified_val8    
-	   CALL AXIS_ENDS(dep_ax, dep_dim, grid1, dep_min, dep_max,
+	   CALL AXIS_ENDS(dep_ax, dep_dim, grid, dep_min, dep_max,
      .                      delta, indep_is_log, dep_axtyp, versus, status)
 
 	   CALL GET_AXIS_FORMAT( dep_min, dep_max, delta, 
@@ -561,11 +551,11 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 *     number for drawing the trajectories.
 
 * determine 6D shape of context, get size of color var
-	   CALL GET_CX_DIMS_ZERO( cx, ndim, dim )
-	   dep_dim = dim(1)
-	   npts2 = CGRID_SIZE(cx)
+	CALL GET_CX_DIMS_ZERO( cx, ndim, dim )
+	dep_dim = dim(1)
+	npts2 = CGRID_SIZE(cx)
 
-	   CALL EXTRACT_LINE (	cx,
+	CALL EXTRACT_LINE (	cx,
      .				memry(mv)%ptr,
      .				mv,
      .				dep_dat,
@@ -574,63 +564,57 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
      .				npts2,
      .				status	)
  
-	   IF ( status .NE. ferr_ok ) GOTO 5000
+	IF (color_by_station) THEN
 
-* default color key
-	   CALL RIBBON_PLOTKEY_SETUP (overlay, status)
-	   IF (status .NE. ferr_ok) GOTO 5000
-
-	   set_lev = .FALSE.  ! will auto-set levels
-
-!TODO
-* If color by a nfeatures variable,need to expand to the feature-axis. If color by a string,
-* use index-value.  If color by an obs value, the expectation is that the
-* constraints in Z have picked out one depth level. Use the first valid value
-* encountered in each profile.
-* If they didn't specify /LEVELS, set levels, use a centered-label color 
-* key and label the key with the feature variable. Do this even for numeric 
-* feature-id, label by feature variable, in order of feature number. These
-* aren't taken to be increasing numeric values that could be used to set 
-* numeric levels.
-
-	   IF (npts2.EQ.nftrsets) THEN
-
-	      IF (qual_given(slash_plot_levels) .EQ. 0) THEN
-	         CALL SET_DSG_ID_LEV 
-     .              (dset, cx, nfeatures, dep_dat, mr_type(mv), changed_key)
- 
-	        set_lev = .TRUE.
-	      ELSE
-
-* If they said /levels=v this doesnt make sense.  Just use linear levs.
-	         IF (need_std) THEN
-	            need_std = .FALSE.
-	            CALL USE_LINEAR_LEVELS
-	         ENDIF
-	         set_lev = .TRUE.
-	      ENDIF
-
-	      IF (npts2 .EQ. nftrsets) THEN
-	         imask = 0
-	         DO i = 1, nfeatures
-	            IF (.NOT.process_feature(i)) CYCLE
-	            imask = imask + 1 
-	            dep_dat(imask) = i
-	         ENDDO
-
-	      ENDIF
+* Set up to label the plot key 
+	   CALL SET_DSG_ID_LEV 
+     .              (dset, cx, nftrsets, dep_dat, mr_type(mv), changed_key)
+	   set_lev = .TRUE.
 
 * Set the cx_plot  limits from the command context so the plot labels will be correct
-	      CALL DSG_ID_CX (cx, nftrsets)
+	   CALL DSG_ID_CX (cx, nftrsets)
+	      
+* Put the trajectory-number into dep_dat
 
-	   ENDIF
-	
+	   DO i = 1, nfeatures
+	      dep_dat(i) = cmpnd_index(i)
+	   ENDDO
+
+	   npts2 = nfeatures
+
+	ENDIF
+
+	IF ( status .NE. ferr_ok ) GOTO 5000
+
+* if color-by trajectory-id variable or timeseries-station variable,
+* use the index variable 
+
+
+* default color key
+	CALL RIBBON_PLOTKEY_SETUP (overlay, status)
+	IF (status .NE. ferr_ok) GOTO 5000
+
+	set_lev = .FALSE.  ! will auto-set levels
+
 * ... Now get the data values to use in the color-by-variable plot along
 *     the trajectories.
 
-        IF (npts2 .EQ. obsdimlen) THEN
+        IF (npts2 .EQ. nfeatures) THEN
 
-c----------------------
+
+	   imask = 0
+	   DO ifeature = 1, nfeatures 
+
+	      IF (.NOT.process_feature(ifeature)) CYCLE
+
+	      imask = imask + 1
+	      dep_dat(imask) = dep_dat(ifeature) 
+
+	   ENDDO
+
+	ENDIF  
+
+        IF (npts2 .EQ. obsdimlen) THEN
 
            iline = 0
 	   irow_f = 1
@@ -771,7 +755,7 @@ c----------------------
 	   DO i = 1, nfeatures
 	      imask = imask + 1
 	      dep_dat(imask) = 0.
-	      IF (cmpnd_index(i) .NE. ic) THEN
+	      IF (cmpnd_index(i).NE.ic .AND. imask.GT.1) THEN
 	         dep_dat(imask-1) = 1.
 		 ic = cmpnd_index(i)
               ENDIF
@@ -863,6 +847,10 @@ c----------------------
 	DEALLOCATE (cmpnd_index) 
 	DEALLOCATE (process_feature)
 	DEALLOCATE (coord)
+
+* no need to unwind things at the end of xeq_plot.
+	IF (color_by_station) grid_is_dsg = .FALSE. 
+
 
 	RETURN
 

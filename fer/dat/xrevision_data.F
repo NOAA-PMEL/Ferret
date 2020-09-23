@@ -155,12 +155,15 @@
 * v7.6     11/27/2019 bump DSG version number to 7.6 to distinguish from updated pre-DSG version (7.52)
 * v7.61     7/23/2020 fixes and revisions to v7.6
 * v7.62     8/18/2020 TrajectoryProfile and TimeseriesProfile handled, but only as if they are profile
+* v7.63     9/23/2020 TrajectoryProfile and TimeseriesProfile handled for plots, listings, not SAVE
+*                     PLOT/ALONG=xy for maps of traj-prof, ts-prof, and also traj and prof data       
+*                     PLOT/ALONG=T for TimeseriesProfile data
 
 	IMPLICIT NONE
 	include	'xrevision.cmn'
 
 	DATA program_name	/ 'FERRET' /
 	DATA len_program_name	/  6       /
-	DATA revision_level	/  7.62   /
+	DATA revision_level	/  7.63   /
 
 	END
