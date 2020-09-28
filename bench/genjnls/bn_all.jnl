@@ -1355,6 +1355,12 @@ GO bn_dsg_reshapefcn
 GO bn_reset bn_dsg_compound
 GO bn_compound_dsg
 
+GO bn_reset bn_dsg_plotalong
+GO bn_dsg_plotalong
+
+GO bn_reset bn_dsg_return_coord
+GO bn_dsg_return_coord
+
 ! *********** PyFerret-specific scripts ***********
 
 IF ($program_name"0|PyFerret>1|*>0") THEN

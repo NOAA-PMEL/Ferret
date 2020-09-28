@@ -46,7 +46,7 @@
 * based on dsg_traj_plot_set_up, Set up to draw trajectory plots from a dsg trajectoryProfile dataset
 * V762 *acm* 9/20 
 * v763 *acm* 9/20 Plots of id-variables in trajectory-profile, timeseries-profile data
-
+* V763 *acm* 9/20 Also plot/along=xy for timeseries or profile data to make a map.
 
 	include 'tmap_dims.parm'
 	include 'xtm_grid.cmn_text'
@@ -90,7 +90,7 @@
      .			this_no_range(max_line_on_plot), indep_is_log, set_lev, 
      .			its_dsg, its_cmpnd, mask_applied, user_hlim, is_dsg, 
      .			is_cmpnd, dirs(4), tsprof, its_traj, dsg_as_time, 
-     .			dsg_as_traj, as_traj, color_by_station
+     .			dsg_as_traj, as_traj, color_by_station, first_warn
      .			
 	CHARACTER	LEFINT*8, LEFT_REAL*16, FULL_VAR_TITLE*2040,
      .			indep_ax*1, dep_ax*1, tstyle*3, 
@@ -160,6 +160,7 @@
 	ribbon_var = 1
 	hlen = xlen 
 	line_symbol = symbol
+	first_warn = .TRUE.
 
 	! dummy values
 	cal_id_1 = 0
@@ -176,8 +177,14 @@
 
 	CALL TM_DSG_FACTS( grid, idim, obsdimlen, fline, its_dsg, its_cmpnd )
 
-	CALL TM_DSG_FTRSET_FACTS( grid, dset, orientation, 
+	IF (its_cmpnd) THEN
+	   CALL TM_DSG_FTRSET_FACTS( grid, dset, orientation, 
      .                  nfeatures, nftrsets, is_dsg, is_cmpnd, status )
+	ELSE   
+	   nftrsets = 0
+	   nfeatures = TM_DSG_NFEATURES( grid )
+	   orientation = dsg_orientation(dset)
+	ENDIF
 
 	tsprof = (orientation .EQ. pfeatureType_TimeseriesProfile)
      
@@ -260,6 +267,20 @@
 	   
 	row_size_lm = dsg_loaded_lm(dsg_row_size_var(dset))
 
+	IF (dsg_as_traj) THEN
+
+	   IF (orientation.EQ.t_dim .AND. cx_lo_ww(t_dim, cx_cmnd) .EQ. unspecified_val8  ) THEN
+	      CALL WARN (
+     .        'PLOT/ALONG=  with no /T= specified uses the first data value in each timeseries')
+	      first_warn = .FALSE.
+
+	   ELSE IF (orientation.NE.t_dim  .AND. cx_lo_ww(z_dim, cx_cmnd) .EQ. unspecified_val8  ) THEN
+	      CALL WARN (
+     .        'PLOT/ALONG=  with no /Z= specified uses the first data value in each profile')
+	      first_warn = .FALSE.
+	   ENDIF
+
+	ENDIF
 
 * * * * * * *    - - - INDEPENDENT AXIS DATA - - - * * * * * * * * *
 	
@@ -635,7 +656,7 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 	     CALL MAKE_DSG_OBS_MASK(dset, cx, ifeature, base,
      .				  process_obs(irow_f), nobs)
 
-* Find first and last valid points for this feature applying the user's context 
+* Find first and last points for this feature applying the user's context 
 * This just masks the range of the dependent variable. Still need to apply the 
 * process_obs mask to the dependent variable when plotting.
 
@@ -665,6 +686,21 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 	         dep_dat(imask) = mr_bad_data(mv)
 	      ELSE
 	         dep_dat(imask) = dep_dat(irow_start)  ! or some average of the valid masked data?
+	      ENDIF
+
+
+
+	      IF (dsg_as_traj .AND. irow_start.NE.irow_end .AND. first_warn) THEN
+
+	         IF (orientation.EQ.t_dim) THEN
+		    CALL WARN (
+     .            'PLOT/ALONG= /T=LO:HI uses the first data value in the T- range in each timeseries')
+		 ELSE
+		    CALL WARN (
+     .            'PLOT/ALONG= /Z=LO:HI uses the first data value in the Z- range on each profile')
+		 ENDIF
+
+		 first_warn = .FALSE.
 	      ENDIF
 
 * ... prepare for the next feature

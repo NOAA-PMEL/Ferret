@@ -1,0 +1,34 @@
+! bn_dsg_return_coord.jnl
+!   `var,return=xcoord`  for DSG variables
+
+use profile_dsg.nc
+say `sal,return=xcoord`
+say `sal,return=ycoord`
+say `sal,return=zcoord`
+say `sal,return=tcoord`
+say `sal,return=xaxis`
+say `sal,return=zaxis`
+say `sal,return=eaxis`
+
+
+use dsg_trajprofile_example.nc
+say `temperature,return=xcoord`
+say `temperature,return=ycoord`
+say `temperature,return=zcoord`
+say `temperature,return=tcoord`
+say `temperature,return=xaxis`
+say `temperature,return=zaxis`
+say `temperature,return=eaxis`
+
+! Intentional errors
+set mode ignore
+
+! The variable has to be an instance variable or a obs variable
+say `trajectory,return=xcoord`
+
+! Desn't apply to gridded datasets
+
+use coads_climatology
+say `sst,return=xcoord`
+
+set mode/last ignore
