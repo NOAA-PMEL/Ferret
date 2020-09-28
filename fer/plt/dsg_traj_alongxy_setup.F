@@ -90,7 +90,7 @@
      .			this_no_range(max_line_on_plot), indep_is_log, set_lev, 
      .			its_dsg, its_cmpnd, mask_applied, user_hlim, is_dsg, 
      .			is_cmpnd, dirs(4), tsprof, its_traj, dsg_as_time, 
-     .			dsg_as_traj, as_traj, color_by_station, first_warn
+     .			dsg_as_traj, as_traj, color_by_station
      .			
 	CHARACTER	LEFINT*8, LEFT_REAL*16, FULL_VAR_TITLE*2040,
      .			indep_ax*1, dep_ax*1, tstyle*3, 
@@ -120,7 +120,7 @@
      .			ind_len, first, last, hlen, dep_lo, 
      .			dep_hi, indep_lo, indep_hi, pad
 	REAL		ind_min, ind_max, dep_min, dep_max, 
-     .			delta, tmp, labsize
+     .			delta, tmp, labsize, bad, psum, pcnt
 	REAL*4 rbad
 
 * local parameter declarations:
@@ -160,7 +160,6 @@
 	ribbon_var = 1
 	hlen = xlen 
 	line_symbol = symbol
-	first_warn = .TRUE.
 
 	! dummy values
 	cal_id_1 = 0
@@ -267,20 +266,6 @@
 	   
 	row_size_lm = dsg_loaded_lm(dsg_row_size_var(dset))
 
-	IF (dsg_as_traj) THEN
-
-	   IF (orientation.EQ.t_dim .AND. cx_lo_ww(t_dim, cx_cmnd) .EQ. unspecified_val8  ) THEN
-	      CALL WARN (
-     .        'PLOT/ALONG=  with no /T= specified uses the first data value in each timeseries')
-	      first_warn = .FALSE.
-
-	   ELSE IF (orientation.NE.t_dim  .AND. cx_lo_ww(z_dim, cx_cmnd) .EQ. unspecified_val8  ) THEN
-	      CALL WARN (
-     .        'PLOT/ALONG=  with no /Z= specified uses the first data value in each profile')
-	      first_warn = .FALSE.
-	   ENDIF
-
-	ENDIF
 
 * * * * * * *    - - - INDEPENDENT AXIS DATA - - - * * * * * * * * *
 	
@@ -607,6 +592,26 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 
 	IF ( status .NE. ferr_ok ) GOTO 5000
 
+* Issue a note about averaging to color-by one value per profile
+
+	IF (dsg_as_traj .AND. npts2.EQ.obsdimlen) THEN
+
+	   IF (cx_lo_ww(t_dim, cx_cmnd).EQ.unspecified_val8 .OR. 
+     .         cx_lo_ww(t_dim, cx_cmnd).NE.cx_hi_ww(t_dim, cx_cmnd)) THEN
+
+
+	      IF (orientation.EQ.t_dim) THEN
+		    CALL WARN (
+     .            'PLOT/ALONG= with /T=LO:HI colors the plot with AVE of timeseries data in that range')
+	      ELSE
+		    CALL WARN (
+     .            'PLOT/ALONG= with /Z=LO:HI colors the plot with AVE of profile data in that range')
+	      ENDIF
+
+	   ENDIF
+
+	ENDIF
+
 * if color-by trajectory-id variable or timeseries-station variable,
 * use the index variable 
 
@@ -616,6 +621,7 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 	IF (status .NE. ferr_ok) GOTO 5000
 
 	set_lev = .FALSE.  ! will auto-set levels
+	bad = mr_bad_data(mv)
 
 * ... Now get the data values to use in the color-by-variable plot along
 *     the trajectories.
@@ -642,7 +648,6 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 	   irow_l = 0
 	   imask = 0
 
-	   imask = 0
 	   DO ifeature = 1, nfeatures 
 	      nobs = dsg_linemem(row_size_lm)%ptr(ifeature)  ! feature length
 	      IF (nobs .EQ. 0) GOTO 222
@@ -683,24 +688,22 @@ c     .                    npts, nfeatures, ind_min, ind_max, user_hlim)
 
 	      imask = imask + 1
 	      IF (irow_start.EQ.0 .OR. irow_end.EQ.0) THEN
-	         dep_dat(imask) = mr_bad_data(mv)
+	         dep_dat(imask) = bad_val4
 	      ELSE
-	         dep_dat(imask) = dep_dat(irow_start)  ! or some average of the valid masked data?
-	      ENDIF
+	         
+		 psum = 0.
+		 pcnt = 0.
+		 DO i = irow_start, irow_end
 
+		    IF (dep_dat(i) .NE. bad) THEN
+		       psum = psum + dep_dat(i) 
+		       pcnt = pcnt + 1.
+		    ENDIF
 
-
-	      IF (dsg_as_traj .AND. irow_start.NE.irow_end .AND. first_warn) THEN
-
-	         IF (orientation.EQ.t_dim) THEN
-		    CALL WARN (
-     .            'PLOT/ALONG= /T=LO:HI uses the first data value in the T- range in each timeseries')
-		 ELSE
-		    CALL WARN (
-     .            'PLOT/ALONG= /Z=LO:HI uses the first data value in the Z- range on each profile')
-		 ENDIF
-
-		 first_warn = .FALSE.
+	         ENDDO
+		 
+		 dep_dat(imask) = bad_val4
+		 IF (psum .GT. 0.) dep_dat(imask) = psum / pcnt
 	      ENDIF
 
 * ... prepare for the next feature
